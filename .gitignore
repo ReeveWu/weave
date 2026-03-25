@@ -30,6 +30,7 @@ Thumbs.db
 
 # Project-specific
 data/*
+!data/.gitkeep
 output/
 temp/
 *.jpg

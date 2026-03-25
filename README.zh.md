@@ -86,7 +86,7 @@ cp .env.example .env
 ### 基本用法
 
 ```bash
-# 將 PDF 投影片放入 ./input_slides/ 後執行
+# 將 PDF 投影片放入 ./data/ 後執行
 weave
 
 # 指定輸入輸出目錄

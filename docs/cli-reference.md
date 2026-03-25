@@ -12,7 +12,7 @@ weave [OPTIONS]
 
 | Option | Short | Default | Description |
 |--------|-------|---------|-------------|
-| `--input` | `-i` | `./input_slides` | Input directory containing PDF files |
+| `--input` | `-i` | `./data` | Input directory containing PDF files |
 | `--output` | `-o` | `./output` | Output directory for handout and images |
 | `--model` | `-m` | `gemini-2.5-flash` | Gemini model to use |
 | `--api-key` | `-k` | `$GEMINI_API_KEY` | Gemini API key |
