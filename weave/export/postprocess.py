@@ -5,12 +5,19 @@ import shutil
 
 from ..config import PipelineConfig, console
 
+
 def _ensure_list_spacing(md_text: str) -> str:
     _list_item = ('* ', '- ', '+ ', '1. ')
     text = md_text.splitlines()
     result = []
     for i, line in enumerate(text):
-        if line.startswith(_list_item) and i > 0 and not text[i - 1].startswith(_list_item) and text[i - 1].strip() != '':
+        prev = text[i - 1] if i > 0 else ''
+        if (
+            line.startswith(_list_item)
+            and i > 0
+            and not prev.startswith(_list_item)
+            and prev.strip() != ''
+        ):
             result.append('')
         result.append(line)
     return "\n".join(result)
