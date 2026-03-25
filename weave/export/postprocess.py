@@ -5,6 +5,15 @@ import shutil
 
 from ..config import PipelineConfig, console
 
+def _ensure_list_spacing(md_text: str) -> str:
+    _list_item = ('* ', '- ', '+ ', '1. ')
+    text = md_text.splitlines()
+    result = []
+    for i, line in enumerate(text):
+        if line.startswith(_list_item) and i > 0 and not text[i - 1].startswith(_list_item) and text[i - 1].strip() != '':
+            result.append('')
+        result.append(line)
+    return "\n".join(result)
 
 def post_process(
     markdown_content: str,
@@ -13,6 +22,8 @@ def post_process(
 ) -> None:
     """Copy referenced images, save handout, and verify slide coverage."""
     console.print("[bold cyan]🔧 Post-processing...[/]")
+
+    markdown_content = _ensure_list_spacing(markdown_content)
 
     # 1. Find referenced images in the Markdown
     ref_pattern = re.compile(r"!\[.*?\]\(\./images/(slide_\d{2}_page_\d{3}\.jpg)\)")
