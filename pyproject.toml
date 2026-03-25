@@ -1,0 +1,67 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "weave-slides"
+dynamic = ["version"]
+description = "Weave — Transform PDF lecture slides into structured Markdown handouts using multimodal AI"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+keywords = [
+    "pdf", "slides", "markdown", "ai", "gemini", "lecture",
+    "handout", "education", "multimodal", "note-taking", "weave",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Education",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+dependencies = [
+    "google-genai>=1.0.0",
+    "pdf2image>=1.17.0",
+    "python-dotenv>=1.0.0",
+    "rich>=13.0.0",
+    "Pillow>=10.0.0",
+    "weasyprint>=60.0",
+    "markdown>=3.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.4.0",
+]
+
+[project.scripts]
+weave = "weave.cli:main"
+weave-pdf = "weave.cli:pdf_main"
+
+[project.urls]
+Homepage = "https://github.com/YOUR_USERNAME/weave"
+Repository = "https://github.com/YOUR_USERNAME/weave"
+Issues = "https://github.com/YOUR_USERNAME/weave/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["weave"]
+
+[tool.hatch.version]
+path = "weave/__init__.py"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
