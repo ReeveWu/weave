@@ -15,9 +15,7 @@ def post_process(
     console.print("[bold cyan]🔧 Post-processing...[/]")
 
     # 1. Find referenced images in the Markdown
-    ref_pattern = re.compile(
-        r"!\[.*?\]\(\./images/(slide_\d{2}_page_\d{3}\.jpg)\)"
-    )
+    ref_pattern = re.compile(r"!\[.*?\]\(\./images/(slide_\d{2}_page_\d{3}\.jpg)\)")
     referenced = set(ref_pattern.findall(markdown_content))
 
     # 2. Copy referenced images to output

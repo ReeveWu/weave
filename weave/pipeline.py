@@ -89,11 +89,7 @@ def run_pipeline(config: PipelineConfig) -> None:
         convert_to_pdf(config)
 
     console.print("\n[bold green]✨ Handout generation complete![/]")
-    console.print(
-        f"[dim]Output: {config.output_dir / 'handout.md'}[/]"
-    )
+    console.print(f"[dim]Output: {config.output_dir / 'handout.md'}[/]")
     if config.pdf:
-        console.print(
-            f"[dim]   PDF: {config.output_dir / 'handout.pdf'}[/]"
-        )
+        console.print(f"[dim]   PDF: {config.output_dir / 'handout.pdf'}[/]")
     console.print()

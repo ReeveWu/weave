@@ -27,51 +27,76 @@ def main(argv: list[str] | None = None) -> None:
         ),
     )
     parser.add_argument(
-        "-V", "--version", action="version",
+        "-V",
+        "--version",
+        action="version",
         version=f"%(prog)s {__version__}",
     )
     parser.add_argument(
-        "-i", "--input", type=Path, default=Path("./data"),
+        "-i",
+        "--input",
+        type=Path,
+        default=Path("./data"),
         help="Input directory containing PDF files (default: ./data)",
     )
     parser.add_argument(
-        "-o", "--output", type=Path, default=Path("./output"),
+        "-o",
+        "--output",
+        type=Path,
+        default=Path("./output"),
         help="Output directory for generated handout (default: ./output)",
     )
     parser.add_argument(
-        "-m", "--model", type=str, default=None,
+        "-m",
+        "--model",
+        type=str,
+        default=None,
         help="Gemini model name (default: env GEMINI_MODEL or gemini-2.5-flash)",
     )
     parser.add_argument(
-        "-k", "--api-key", type=str, default=None,
+        "-k",
+        "--api-key",
+        type=str,
+        default=None,
         help="Gemini API key (default: env GEMINI_API_KEY)",
     )
     parser.add_argument(
-        "--dpi", type=int, default=200,
+        "--dpi",
+        type=int,
+        default=200,
         help="DPI for PDF to image conversion (default: 200)",
     )
     parser.add_argument(
-        "--quality", type=int, default=85,
+        "--quality",
+        type=int,
+        default=85,
         help="JPEG quality 1-100 (default: 85)",
     )
     parser.add_argument(
-        "--language", type=str, default="繁體中文",
+        "--language",
+        type=str,
+        default="繁體中文",
         help="Output language for the handout (default: 繁體中文)",
     )
     parser.add_argument(
-        "--temp-dir", type=Path, default=Path("./temp"),
+        "--temp-dir",
+        type=Path,
+        default=Path("./temp"),
         help="Temporary directory for intermediate files (default: ./temp)",
     )
     parser.add_argument(
-        "--keep-temp", action="store_true",
+        "--keep-temp",
+        action="store_true",
         help="Keep temporary files after processing",
     )
     parser.add_argument(
-        "--outline-only", action="store_true",
+        "--outline-only",
+        action="store_true",
         help="Only generate the outline, skip chapter expansion",
     )
     parser.add_argument(
-        "--pdf", action="store_true",
+        "--pdf",
+        action="store_true",
         help="Also export the handout as PDF (requires weasyprint & markdown)",
     )
 
@@ -113,11 +138,15 @@ def pdf_main(argv: list[str] | None = None) -> None:
         description="Convert a Markdown file to PDF.",
     )
     parser.add_argument(
-        "input", type=Path,
+        "input",
+        type=Path,
         help="Path to the Markdown (.md) file to convert",
     )
     parser.add_argument(
-        "-o", "--output", type=Path, default=None,
+        "-o",
+        "--output",
+        type=Path,
+        default=None,
         help="Output PDF path (default: same directory, .pdf extension)",
     )
 

@@ -20,9 +20,7 @@ def convert_pdfs_to_images(config: PipelineConfig) -> list[str]:
     """
     pdf_files = sorted(config.input_dir.glob("*.pdf"))
     if not pdf_files:
-        console.print(
-            f"[bold red]Error: No PDF files found in {config.input_dir}[/]"
-        )
+        console.print(f"[bold red]Error: No PDF files found in {config.input_dir}[/]")
         sys.exit(1)
 
     all_filenames: list[str] = []
@@ -32,7 +30,10 @@ def convert_pdfs_to_images(config: PipelineConfig) -> list[str]:
         for pdf_idx, pdf_path in enumerate(pdf_files, start=1):
             task = progress.add_task(f"Converting {pdf_path.name}...", total=None)
             images = convert_from_path(
-                str(pdf_path), dpi=config.dpi, fmt="jpeg", thread_count=4,
+                str(pdf_path),
+                dpi=config.dpi,
+                fmt="jpeg",
+                thread_count=4,
             )
             progress.update(task, total=len(images))
 
