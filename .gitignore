@@ -36,6 +36,7 @@ temp/
 *.jpg
 *.jpeg
 *.png
+!assets/*
 
 # Jupyter
 .ipynb_checkpoints/
