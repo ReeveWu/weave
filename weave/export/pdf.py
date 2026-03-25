@@ -64,8 +64,18 @@ def convert_md_to_pdf(md_path: Path, pdf_path: Path | None = None) -> Path:
         color: #2c3e50;
         font-size: 11pt;
     }}
-    h1 {{ font-size: 22pt; border-bottom: 2px solid #3498db; padding-bottom: 6px; margin-top: 30px; }}
-    h2 {{ font-size: 17pt; border-bottom: 1px solid #bdc3c7; padding-bottom: 4px; margin-top: 24px; }}
+    h1 {{
+        font-size: 22pt;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 6px;
+        margin-top: 30px;
+    }}
+    h2 {{
+        font-size: 17pt;
+        border-bottom: 1px solid #bdc3c7;
+        padding-bottom: 4px;
+        margin-top: 24px;
+    }}
     h3 {{ font-size: 14pt; margin-top: 18px; }}
     h4 {{ font-size: 12pt; margin-top: 14px; }}
     code {{
