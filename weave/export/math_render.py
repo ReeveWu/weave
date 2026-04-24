@@ -70,7 +70,10 @@ def _parse_arg(latex: str, pos: int) -> tuple[str, int]:
 
 
 def _parse_command(latex: str, pos: int) -> tuple[str, int]:
-    r"""Parse ``\command`` starting at ``\``.  Returns *(cmd_with_backslash, new_pos)*."""
+    r"""Parse ``\command`` starting at ``\``.
+
+    Returns *(cmd_with_backslash, new_pos)*.
+    """
     pos += 1  # skip '\'
     if pos >= len(latex):
         return "\\", pos
