@@ -104,6 +104,9 @@ weave --language English
 # 同時輸出 PDF
 weave --pdf
 
+# 如果 Gemini 503/high demand，拉長重試等待時間
+weave --unavailable-retry-delay 60 --max-retries 5
+
 # 將已產生的 Markdown 單獨轉成 PDF
 weave-pdf output/20260325_160828/handout.md
 weave-pdf handout.md -o my_handout.pdf

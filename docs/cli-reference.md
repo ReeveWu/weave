@@ -23,6 +23,9 @@ weave [OPTIONS]
 | `--keep-temp` | | `false` | Keep temporary files after processing |
 | `--outline-only` | | `false` | Only generate outline, skip expansion |
 | `--pdf` | | `false` | Also export the handout as PDF |
+| `--max-retries` | | `3` | Max Gemini retry attempts |
+| `--retry-base-delay` | | `2` | Base retry delay in seconds for general API errors |
+| `--unavailable-retry-delay` | | `30` | Minimum retry delay in seconds for Gemini `503 UNAVAILABLE` |
 | `--version` | `-V` | | Show version number |
 
 ### Examples
@@ -51,6 +54,9 @@ weave --keep-temp
 
 # Pass the API key directly
 weave -k "your-api-key" -i ./slides
+
+# Slow down retries when Gemini returns 503 high demand
+weave --unavailable-retry-delay 60 --max-retries 5
 ```
 
 ---

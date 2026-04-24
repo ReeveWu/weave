@@ -52,3 +52,6 @@ print(f"PDF saved to {pdf_path}")
 | `keep_temp` | `bool` | `False` | Keep temporary files |
 | `outline_only` | `bool` | `False` | Only generate outline |
 | `pdf` | `bool` | `False` | Export handout as PDF |
+| `max_retries` | `int` | `3` | Max Gemini retry attempts |
+| `retry_base_delay` | `int` | `2` | Base retry delay in seconds for general API errors |
+| `unavailable_retry_delay` | `int` | `30` | Minimum retry delay in seconds for Gemini `503 UNAVAILABLE` |

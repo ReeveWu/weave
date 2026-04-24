@@ -100,6 +100,9 @@ weave --keep-temp
 # Export as PDF (appended to pipeline)
 weave --pdf
 
+# If Gemini returns 503/high demand, wait longer before retrying
+weave --unavailable-retry-delay 60 --max-retries 5
+
 # Convert an existing Markdown file to PDF standalone
 weave-pdf output/20260325_160828/handout.md
 weave-pdf handout.md -o my_handout.pdf
