@@ -3,6 +3,76 @@
 from pathlib import Path
 
 from ..config import PipelineConfig, console
+from .postprocess import (
+    _ensure_list_spacing,
+    _ensure_table_spacing,
+    _unwrap_backtick_images,
+)
+
+
+def _get_code_css() -> str:
+    """Return Pygments CSS plus PDF-friendly wrapping for highlighted code."""
+    from pygments.formatters import HtmlFormatter
+
+    pygments_css = HtmlFormatter(style="friendly").get_style_defs(".codehilite")
+    return f"""
+{pygments_css}
+
+    /* --- Code block rendering --- */
+    .codehilite {{
+        background-color: #f4f4f4;
+        border-radius: 5px;
+        margin: 12px 0;
+        max-width: 100%;
+    }}
+    .codehilite pre {{
+        margin: 0;
+    }}
+    .codehilite pre,
+    .codehilite code {{
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }}
+    .codehilite code {{
+        display: block;
+        background: transparent;
+        padding: 0;
+        border-radius: 0;
+        color: inherit;
+    }}
+"""
+
+
+def _markdown_to_html(md_text: str) -> str:
+    """Convert Markdown to HTML with protected math and Pygments code classes."""
+    import markdown
+
+    from .math_render import protect_math, restore_math
+
+    md_text = _ensure_list_spacing(md_text)
+    md_text = _ensure_table_spacing(md_text)
+    md_text = _unwrap_backtick_images(md_text)
+
+    # Protect $...$ math from Markdown mangling (_ as emphasis, etc.)
+    md_text, math_map = protect_math(md_text)
+
+    extensions = ["tables", "fenced_code", "codehilite", "toc", "md_in_html"]
+    extension_configs = {
+        "codehilite": {
+            "guess_lang": False,
+            "linenums": False,
+            "noclasses": False,
+            "use_pygments": True,
+        }
+    }
+    html_body = markdown.markdown(
+        md_text,
+        extensions=extensions,
+        extension_configs=extension_configs,
+    )
+
+    return restore_math(html_body, math_map)
 
 
 def convert_md_to_pdf(md_path: Path, pdf_path: Path | None = None) -> Path:
@@ -31,8 +101,10 @@ def convert_md_to_pdf(md_path: Path, pdf_path: Path | None = None) -> Path:
                     f"{homebrew_lib}:{existing}" if existing else homebrew_lib
                 )
 
-    import markdown
     from weasyprint import HTML
+    from weasyprint.text.fonts import FontConfiguration
+
+    from .math_render import MATH_CSS
 
     md_path = Path(md_path).resolve()
     if not md_path.exists():
@@ -43,20 +115,25 @@ def convert_md_to_pdf(md_path: Path, pdf_path: Path | None = None) -> Path:
     else:
         pdf_path = Path(pdf_path).resolve()
 
-    md_text = md_path.read_text(encoding="utf-8")
+    html_body = _markdown_to_html(md_path.read_text(encoding="utf-8"))
+    code_css = _get_code_css()
 
-    extensions = ["tables", "fenced_code", "codehilite", "toc", "md_in_html"]
-    html_body = markdown.markdown(md_text, extensions=extensions)
+    font_config = FontConfiguration()
 
     # Wrap in full HTML with styling
+    # NOTE: macOS Preview has rendering issues with CFF-based OpenType fonts
+    # (CID Type 0C) like PingFang TC.  TrueType-based CJK fonts such as
+    # "Heiti TC" embed as CID TrueType and render correctly in Preview.
+    # Chrome's PDF viewer (PDFium) handles both formats fine, which is why
+    # the PDF looks correct in Chrome but has missing glyphs in Preview.
     html_content = f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 <style>
     body {{
-        font-family: "Helvetica Neue", Arial, "Noto Sans TC", "PingFang TC",
-                     "Microsoft JhengHei", sans-serif;
+        font-family: "Heiti TC", "Noto Sans TC", "Microsoft JhengHei",
+                     "PingFang TC", "Helvetica Neue", Arial, sans-serif;
         line-height: 1.8;
         max-width: 210mm;
         margin: 0 auto;
@@ -83,6 +160,8 @@ def convert_md_to_pdf(md_path: Path, pdf_path: Path | None = None) -> Path:
         padding: 2px 5px;
         border-radius: 3px;
         font-size: 10pt;
+        font-family: "Heiti TC", "Noto Sans TC", "Microsoft JhengHei",
+                     Menlo, Consolas, "Courier New", monospace;
     }}
     pre {{
         background-color: #f4f4f4;
@@ -91,8 +170,11 @@ def convert_md_to_pdf(md_path: Path, pdf_path: Path | None = None) -> Path:
         overflow-x: auto;
         font-size: 10pt;
         line-height: 1.4;
+        font-family: "Heiti TC", "Noto Sans TC", "Microsoft JhengHei",
+                     Menlo, Consolas, "Courier New", monospace;
     }}
     pre code {{ background: none; padding: 0; }}
+{code_css}
     table {{
         border-collapse: collapse;
         width: 100%;
@@ -121,6 +203,7 @@ def convert_md_to_pdf(md_path: Path, pdf_path: Path | None = None) -> Path:
     hr {{ border: none; border-top: 1px solid #ddd; margin: 24px 0; }}
     ul, ol {{ padding-left: 24px; }}
     li {{ margin-bottom: 4px; }}
+{MATH_CSS}
 </style>
 </head>
 <body>
@@ -132,7 +215,7 @@ def convert_md_to_pdf(md_path: Path, pdf_path: Path | None = None) -> Path:
     HTML(
         string=html_content,
         base_url=str(md_path.parent),
-    ).write_pdf(str(pdf_path))
+    ).write_pdf(str(pdf_path), font_config=font_config)
 
     return pdf_path
 

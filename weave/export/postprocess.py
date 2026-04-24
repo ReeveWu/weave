@@ -7,15 +7,52 @@ from ..config import PipelineConfig, console
 
 
 def _ensure_list_spacing(md_text: str) -> str:
-    _list_item = ("* ", "- ", "+ ", "1. ")
+    list_item_re = re.compile(r"^[ \t]*(?:[*+-]|\d+[.)])[ \t]+")
+    fence_re = re.compile(r"^\s{0,3}(```|~~~)")
     text = md_text.splitlines()
     result = []
+    in_fence = False
     for i, line in enumerate(text):
+        if fence_re.match(line):
+            in_fence = not in_fence
+
         prev = text[i - 1] if i > 0 else ""
         if (
-            line.startswith(_list_item)
+            not in_fence
+            and list_item_re.match(line)
             and i > 0
-            and not prev.startswith(_list_item)
+            and not list_item_re.match(prev)
+            and prev.strip() != ""
+        ):
+            result.append("")
+        result.append(line)
+    return "\n".join(result)
+
+
+def _unwrap_backtick_images(md_text: str) -> str:
+    """Remove backticks wrapping image references so they render as images.
+
+    Converts  `![alt](path)`  →  ![alt](path)
+    """
+    return re.sub(r"`(!\[.*?\]\(.*?\))`", r"\1", md_text)
+
+
+def _ensure_table_spacing(md_text: str) -> str:
+    """Insert a blank line before table blocks that lack one.
+
+    Markdown parsers require a blank line before a table; without it the
+    ``| … |`` rows are rendered as plain text.
+    """
+    lines = md_text.splitlines()
+    result: list[str] = []
+    for i, line in enumerate(lines):
+        stripped = line.lstrip()
+        prev = lines[i - 1] if i > 0 else ""
+        prev_stripped = prev.lstrip()
+        if (
+            stripped.startswith("|")
+            and i > 0
+            and not prev_stripped.startswith("|")
             and prev.strip() != ""
         ):
             result.append("")
@@ -32,6 +69,8 @@ def post_process(
     console.print("[bold cyan]🔧 Post-processing...[/]")
 
     markdown_content = _ensure_list_spacing(markdown_content)
+    markdown_content = _ensure_table_spacing(markdown_content)
+    markdown_content = _unwrap_backtick_images(markdown_content)
 
     # 1. Find referenced images in the Markdown
     ref_pattern = re.compile(r"!\[.*?\]\(\./images/(slide_\d{2}_page_\d{3}\.jpg)\)")
