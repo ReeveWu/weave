@@ -103,7 +103,7 @@ def main(argv: list[str] | None = None) -> None:
         "--max-retries",
         type=int,
         default=None,
-        help="Max Gemini retry attempts (default: env WEAVE_MAX_RETRIES or 5)",
+        help="Max Gemini retry attempts (default: env WEAVE_MAX_RETRIES or 6)",
     )
     parser.add_argument(
         "--retry-base-delay",
@@ -141,7 +141,7 @@ def main(argv: list[str] | None = None) -> None:
     # Resolve model
     model = args.model or os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
-    max_retries = max(1, int(args.max_retries or os.getenv("WEAVE_MAX_RETRIES", "5")))
+    max_retries = max(1, int(args.max_retries or os.getenv("WEAVE_MAX_RETRIES", "6")))
     retry_base_delay = max(
         1, int(args.retry_base_delay or os.getenv("WEAVE_RETRY_BASE_DELAY", "2"))
     )

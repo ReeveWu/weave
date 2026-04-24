@@ -30,7 +30,7 @@ class PipelineConfig:
     keep_temp: bool = False
     outline_only: bool = False
     pdf: bool = False
-    max_retries: int = 5
+    max_retries: int = 6
     retry_base_delay: int = 2
     unavailable_retry_delay: int = 30
     resume_dir: Path | None = None

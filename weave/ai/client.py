@@ -66,7 +66,7 @@ def call_gemini(
     system_instruction: str,
     model: str,
     temperature: float = 0.5,
-    max_retries: int = 5,
+    max_retries: int = 6,
     retry_base_delay: int = 2,
     unavailable_retry_delay: int = 30,
 ) -> str:
