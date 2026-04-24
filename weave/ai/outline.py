@@ -35,6 +35,9 @@ def generate_outline(
         system_instruction=get_outline_prompt(config.language),
         model=config.model,
         temperature=0.3,
+        max_retries=config.max_retries,
+        retry_base_delay=config.retry_base_delay,
+        unavailable_retry_delay=config.unavailable_retry_delay,
     )
 
     console.print("[bold green]✓ Outline generated[/]\n")
@@ -129,6 +132,9 @@ def expand_chapter(
         system_instruction=get_expand_prompt(config.language),
         model=config.model,
         temperature=0.7,
+        max_retries=config.max_retries,
+        retry_base_delay=config.retry_base_delay,
+        unavailable_retry_delay=config.unavailable_retry_delay,
     )
 
 
@@ -138,19 +144,47 @@ def expand_all_chapters(
     full_outline: str,
     uploaded_files: dict[str, object],
     config: PipelineConfig,
+    completed_contents: dict[int, str] | None = None,
+    on_chapter_done=None,
 ) -> str:
-    """Pass 2: Expand all chapters into a complete handout."""
+    """Pass 2: Expand all chapters into a complete handout.
+
+    Args:
+        completed_contents: mapping of chapter index to already-expanded text.
+        on_chapter_done: callback(index, content) invoked after each chapter.
+    """
     console.print("[bold cyan]📝 Pass 2: Expanding chapters...[/]")
-    all_content: list[str] = []
+
+    if completed_contents is None:
+        completed_contents = {}
+
+    all_content: list[str | None] = [None] * len(chapters)
+    for idx, content in completed_contents.items():
+        all_content[idx] = content
+
+    remaining = [
+        (i, ch) for i, ch in enumerate(chapters) if i not in completed_contents
+    ]
+
+    if completed_contents:
+        console.print(
+            f"[dim]Resuming: {len(completed_contents)} chapter(s) already done, "
+            f"{len(remaining)} remaining[/]"
+        )
 
     with progress_bar() as progress:
-        task = progress.add_task("Expanding...", total=len(chapters))
-        for i, chapter in enumerate(chapters, start=1):
-            progress.update(task, description=f"Chapter {i}/{len(chapters)}...")
+        total = len(chapters)
+        task = progress.add_task(
+            "Expanding...", total=total, completed=len(completed_contents)
+        )
+        for i, chapter in remaining:
+            progress.update(task, description=f"Chapter {i + 1}/{total}...")
             content = expand_chapter(
                 client, chapter, full_outline, uploaded_files, config
             )
-            all_content.append(content)
+            all_content[i] = content
+            if on_chapter_done:
+                on_chapter_done(i, content)
             progress.update(task, advance=1)
 
     console.print("[bold green]✓ All chapters expanded[/]\n")

@@ -8,6 +8,25 @@ from google.genai import types
 from ..config import PipelineConfig, console, progress_bar
 
 
+def _is_service_unavailable_error(error: Exception) -> bool:
+    """Return True when the error looks like a Gemini 503/UNAVAILABLE spike."""
+    message = str(error).upper()
+    return "503" in message and "UNAVAILABLE" in message
+
+
+def _get_retry_delay(
+    error: Exception,
+    attempt: int,
+    base_delay: int,
+    unavailable_retry_delay: int,
+) -> int:
+    """Compute retry delay, using a longer floor for 503/UNAVAILABLE errors."""
+    wait = base_delay * (3**attempt)
+    if _is_service_unavailable_error(error):
+        return unavailable_retry_delay + wait
+    return wait
+
+
 def upload_images(
     client: genai.Client,
     image_filenames: list[str],
@@ -47,7 +66,9 @@ def call_gemini(
     system_instruction: str,
     model: str,
     temperature: float = 0.5,
-    max_retries: int = 3,
+    max_retries: int = 5,
+    retry_base_delay: int = 2,
+    unavailable_retry_delay: int = 30,
 ) -> str:
     """Call Gemini API with automatic retry on failure."""
     for attempt in range(max_retries):
@@ -65,7 +86,12 @@ def call_gemini(
             console.print("[yellow]Warning: Empty response, retrying...[/]")
         except Exception as e:
             if attempt < max_retries - 1:
-                wait = 2 ** (attempt + 1)
+                wait = _get_retry_delay(
+                    e,
+                    attempt,
+                    base_delay=retry_base_delay,
+                    unavailable_retry_delay=unavailable_retry_delay,
+                )
                 console.print(
                     f"[yellow]API error: {e}, retrying in {wait}s "
                     f"({attempt + 1}/{max_retries})...[/]"

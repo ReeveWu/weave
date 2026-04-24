@@ -99,6 +99,33 @@ def main(argv: list[str] | None = None) -> None:
         action="store_true",
         help="Also export the handout as PDF (requires weasyprint & markdown)",
     )
+    parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=None,
+        help="Max Gemini retry attempts (default: env WEAVE_MAX_RETRIES or 5)",
+    )
+    parser.add_argument(
+        "--retry-base-delay",
+        type=int,
+        default=None,
+        help="Base retry delay in seconds for general API errors "
+        "(default: env WEAVE_RETRY_BASE_DELAY or 2)",
+    )
+    parser.add_argument(
+        "--unavailable-retry-delay",
+        type=int,
+        default=None,
+        help="Minimum retry delay in seconds for Gemini 503/UNAVAILABLE errors "
+        "(default: env WEAVE_UNAVAILABLE_RETRY_DELAY or 30)",
+    )
+    parser.add_argument(
+        "--resume",
+        type=Path,
+        default=None,
+        help="Resume from a previous run's output directory "
+        "(e.g., output/20260416_150643)",
+    )
 
     args = parser.parse_args(argv)
 
@@ -114,6 +141,18 @@ def main(argv: list[str] | None = None) -> None:
     # Resolve model
     model = args.model or os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
+    max_retries = max(1, int(args.max_retries or os.getenv("WEAVE_MAX_RETRIES", "5")))
+    retry_base_delay = max(
+        1, int(args.retry_base_delay or os.getenv("WEAVE_RETRY_BASE_DELAY", "2"))
+    )
+    unavailable_retry_delay = max(
+        1,
+        int(
+            args.unavailable_retry_delay
+            or os.getenv("WEAVE_UNAVAILABLE_RETRY_DELAY", "30")
+        ),
+    )
+
     config = PipelineConfig(
         input_dir=args.input.resolve(),
         output_dir=args.output.resolve(),
@@ -126,6 +165,10 @@ def main(argv: list[str] | None = None) -> None:
         keep_temp=args.keep_temp,
         outline_only=args.outline_only,
         pdf=args.pdf,
+        max_retries=max_retries,
+        retry_base_delay=retry_base_delay,
+        unavailable_retry_delay=unavailable_retry_delay,
+        resume_dir=args.resume.resolve() if args.resume else None,
     )
 
     run_pipeline(config)
