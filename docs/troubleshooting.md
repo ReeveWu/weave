@@ -61,12 +61,12 @@ Gemini may temporarily return `503 UNAVAILABLE` when the selected model is under
 Weave now waits longer for that specific error before retrying. You can tune the behavior with either CLI flags or environment variables:
 
 ```bash
-# Example: wait at least 60 seconds for 503, and retry up to 5 times
-weave --unavailable-retry-delay 60 --max-retries 5
+# Example: wait at least 60 seconds for 503, and retry up to 6 times
+weave --unavailable-retry-delay 60 --max-retries 6
 
 # Equivalent env vars
 export WEAVE_UNAVAILABLE_RETRY_DELAY=60
-export WEAVE_MAX_RETRIES=5
+export WEAVE_MAX_RETRIES=6
 ```
 
 For ordinary API errors, the general backoff is controlled by `--retry-base-delay` or `WEAVE_RETRY_BASE_DELAY`.
