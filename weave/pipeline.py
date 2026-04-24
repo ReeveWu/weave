@@ -122,18 +122,14 @@ def run_pipeline(config: PipelineConfig) -> None:
             )
         else:
             # Step 3: Pass 1 — Outline
-            outline = generate_outline(
-                client, uploaded_files, image_filenames, config
-            )
+            outline = generate_outline(client, uploaded_files, image_filenames, config)
 
             console.print("[dim]── Outline Preview ──[/]")
             console.print(outline[:2000] + ("..." if len(outline) > 2000 else ""))
             console.print()
 
             # Save checkpoint: outline
-            _save_checkpoint(
-                config, outline=outline, image_filenames=image_filenames
-            )
+            _save_checkpoint(config, outline=outline, image_filenames=image_filenames)
 
             # Outline-only mode
             if config.outline_only:

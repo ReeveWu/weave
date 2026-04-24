@@ -8,43 +8,100 @@ import re
 # ---------------------------------------------------------------------------
 _SYMBOLS: dict[str, str] = {
     # Comparison & arithmetic
-    r"\ge": "≥", r"\geq": "≥", r"\le": "≤", r"\leq": "≤",
-    r"\ne": "≠", r"\neq": "≠", r"\approx": "≈", r"\sim": "∼",
-    r"\times": "×", r"\cdot": "·", r"\pm": "±", r"\mp": "∓",
+    r"\ge": "≥",
+    r"\geq": "≥",
+    r"\le": "≤",
+    r"\leq": "≤",
+    r"\ne": "≠",
+    r"\neq": "≠",
+    r"\approx": "≈",
+    r"\sim": "∼",
+    r"\times": "×",
+    r"\cdot": "·",
+    r"\pm": "±",
+    r"\mp": "∓",
     r"\div": "÷",
     # Big operators
-    r"\sum": "∑", r"\prod": "∏", r"\int": "∫",
-    r"\partial": "∂", r"\nabla": "∇", r"\infty": "∞",
+    r"\sum": "∑",
+    r"\prod": "∏",
+    r"\int": "∫",
+    r"\partial": "∂",
+    r"\nabla": "∇",
+    r"\infty": "∞",
     # Greek lowercase
-    r"\alpha": "α", r"\beta": "β", r"\gamma": "γ", r"\delta": "δ",
-    r"\epsilon": "ε", r"\varepsilon": "ε", r"\zeta": "ζ", r"\eta": "η",
-    r"\theta": "θ", r"\iota": "ι", r"\kappa": "κ", r"\lambda": "λ",
-    r"\mu": "μ", r"\nu": "ν", r"\xi": "ξ", r"\pi": "π",
-    r"\rho": "ρ", r"\sigma": "σ", r"\tau": "τ", r"\upsilon": "υ",
-    r"\phi": "φ", r"\varphi": "φ", r"\chi": "χ", r"\psi": "ψ",
+    r"\alpha": "α",
+    r"\beta": "β",
+    r"\gamma": "γ",
+    r"\delta": "δ",
+    r"\epsilon": "ε",
+    r"\varepsilon": "ε",
+    r"\zeta": "ζ",
+    r"\eta": "η",
+    r"\theta": "θ",
+    r"\iota": "ι",
+    r"\kappa": "κ",
+    r"\lambda": "λ",
+    r"\mu": "μ",
+    r"\nu": "ν",
+    r"\xi": "ξ",
+    r"\pi": "π",
+    r"\rho": "ρ",
+    r"\sigma": "σ",
+    r"\tau": "τ",
+    r"\upsilon": "υ",
+    r"\phi": "φ",
+    r"\varphi": "φ",
+    r"\chi": "χ",
+    r"\psi": "ψ",
     r"\omega": "ω",
     # Greek uppercase
-    r"\Gamma": "Γ", r"\Delta": "Δ", r"\Theta": "Θ", r"\Lambda": "Λ",
-    r"\Xi": "Ξ", r"\Pi": "Π", r"\Sigma": "Σ", r"\Phi": "Φ",
-    r"\Psi": "Ψ", r"\Omega": "Ω",
+    r"\Gamma": "Γ",
+    r"\Delta": "Δ",
+    r"\Theta": "Θ",
+    r"\Lambda": "Λ",
+    r"\Xi": "Ξ",
+    r"\Pi": "Π",
+    r"\Sigma": "Σ",
+    r"\Phi": "Φ",
+    r"\Psi": "Ψ",
+    r"\Omega": "Ω",
     # Set & logic
-    r"\in": "∈", r"\notin": "∉", r"\subset": "⊂", r"\supset": "⊃",
-    r"\subseteq": "⊆", r"\supseteq": "⊇", r"\cup": "∪", r"\cap": "∩",
-    r"\forall": "∀", r"\exists": "∃", r"\neg": "¬",
-    r"\land": "∧", r"\lor": "∨",
+    r"\in": "∈",
+    r"\notin": "∉",
+    r"\subset": "⊂",
+    r"\supset": "⊃",
+    r"\subseteq": "⊆",
+    r"\supseteq": "⊇",
+    r"\cup": "∪",
+    r"\cap": "∩",
+    r"\forall": "∀",
+    r"\exists": "∃",
+    r"\neg": "¬",
+    r"\land": "∧",
+    r"\lor": "∨",
     # Arrows
-    r"\leftarrow": "←", r"\rightarrow": "→", r"\leftrightarrow": "↔",
-    r"\Leftarrow": "⇐", r"\Rightarrow": "⇒", r"\Leftrightarrow": "⇔",
+    r"\leftarrow": "←",
+    r"\rightarrow": "→",
+    r"\leftrightarrow": "↔",
+    r"\Leftarrow": "⇐",
+    r"\Rightarrow": "⇒",
+    r"\Leftrightarrow": "⇔",
     # Dots
-    r"\ldots": "…", r"\cdots": "⋯", r"\dots": "…",
+    r"\ldots": "…",
+    r"\cdots": "⋯",
+    r"\dots": "…",
     # Spacing (collapsed to thin spaces for PDF)
-    r"\quad": "\u2003", r"\qquad": "\u2003\u2003",
-    r"\,": "\u2009", r"\;": "\u2005", r"\!": "",
+    r"\quad": "\u2003",
+    r"\qquad": "\u2003\u2003",
+    r"\,": "\u2009",
+    r"\;": "\u2005",
+    r"\!": "",
 }
 
 # ---------------------------------------------------------------------------
 # Low-level LaTeX parsing helpers
 # ---------------------------------------------------------------------------
+
 
 def _parse_group(latex: str, pos: int) -> tuple[str, int]:
     """Parse ``{...}`` starting at ``{``.  Returns *(content, new_pos)*."""
@@ -88,6 +145,7 @@ def _parse_command(latex: str, pos: int) -> tuple[str, int]:
 # ---------------------------------------------------------------------------
 # Core converter
 # ---------------------------------------------------------------------------
+
 
 def _convert(latex: str) -> str:
     """Recursively convert a LaTeX math expression to HTML tokens."""
@@ -142,12 +200,9 @@ def _convert(latex: str) -> str:
 
             elif cmd in (r"\mathrm", r"\text", r"\textrm", r"\mbox"):
                 arg, pos = _parse_arg(latex, new_pos)
-                result.append(
-                    f'<span style="font-style:normal">{_convert(arg)}</span>'
-                )
+                result.append(f'<span style="font-style:normal">{_convert(arg)}</span>')
 
-            elif cmd in (r"\left", r"\right", r"\big", r"\Big",
-                         r"\bigg", r"\Bigg"):
+            elif cmd in (r"\left", r"\right", r"\big", r"\Big", r"\bigg", r"\Bigg"):
                 # sizing hints — just skip the command itself
                 pos = new_pos
 
@@ -198,6 +253,7 @@ def _convert(latex: str) -> str:
 # Public API
 # ---------------------------------------------------------------------------
 
+
 def latex_to_html(latex: str, *, display: bool = False) -> str:
     """Convert a LaTeX expression (without ``$`` delimiters) to HTML."""
     inner = _convert(latex.strip())
@@ -234,9 +290,7 @@ def protect_math(md_text: str) -> tuple[str, dict[str, str]]:
 
     # Display math first (greedy $$…$$), then single-dollar equations that
     # occupy a whole line.  LLMs often emit display equations as plain $...$.
-    text = re.sub(
-        r"\$\$(.+?)\$\$", lambda m: _repl(m, True), md_text, flags=re.DOTALL
-    )
+    text = re.sub(r"\$\$(.+?)\$\$", lambda m: _repl(m, True), md_text, flags=re.DOTALL)
     text = re.sub(
         r"(?m)^([ \t]*(?:(?:[-*+]|\d+[.)])[ \t]+)?)\$([^\$\n]+?)\$[ \t]*$",
         _line_repl,
