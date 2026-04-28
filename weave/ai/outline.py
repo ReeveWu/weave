@@ -2,15 +2,13 @@
 
 import re
 
-from google import genai
-
 from ..config import PipelineConfig, console, progress_bar
-from .client import call_gemini
 from .prompts import get_expand_prompt, get_outline_prompt
+from .providers.base import AIProvider
 
 
 def generate_outline(
-    client: genai.Client,
+    provider: AIProvider,
     uploaded_files: dict[str, object],
     image_filenames: list[str],
     config: PipelineConfig,
@@ -29,8 +27,7 @@ def generate_outline(
         "確保每一頁投影片都至少被歸屬到一個章節中。"
     )
 
-    outline = call_gemini(
-        client,
+    outline = provider.call(
         contents,
         system_instruction=get_outline_prompt(config.language),
         model=config.model,
@@ -101,7 +98,7 @@ def parse_outline_chapters(outline: str) -> list[dict]:
 
 
 def expand_chapter(
-    client: genai.Client,
+    provider: AIProvider,
     chapter: dict,
     full_outline: str,
     uploaded_files: dict[str, object],
@@ -126,8 +123,7 @@ def expand_chapter(
         "請插入圖片引用 `![說明](./images/檔名.jpg)` 並提供詳細文字解析。"
     )
 
-    return call_gemini(
-        client,
+    return provider.call(
         contents,
         system_instruction=get_expand_prompt(config.language),
         model=config.model,
@@ -139,7 +135,7 @@ def expand_chapter(
 
 
 def expand_all_chapters(
-    client: genai.Client,
+    provider: AIProvider,
     chapters: list[dict],
     full_outline: str,
     uploaded_files: dict[str, object],
@@ -180,7 +176,7 @@ def expand_all_chapters(
         for i, chapter in remaining:
             progress.update(task, description=f"Chapter {i + 1}/{total}...")
             content = expand_chapter(
-                client, chapter, full_outline, uploaded_files, config
+                provider, chapter, full_outline, uploaded_files, config
             )
             all_content[i] = content
             if on_chapter_done:

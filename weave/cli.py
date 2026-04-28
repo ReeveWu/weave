@@ -47,18 +47,27 @@ def main(argv: list[str] | None = None) -> None:
         help="Output directory for generated handout (default: ./output)",
     )
     parser.add_argument(
+        "-p",
+        "--provider",
+        type=str,
+        default=None,
+        help="AI provider: gemini, openai, or claude "
+        "(default: env WEAVE_PROVIDER or gemini)",
+    )
+    parser.add_argument(
         "-m",
         "--model",
         type=str,
         default=None,
-        help="Gemini model name (default: env GEMINI_MODEL or gemini-2.5-flash)",
+        help="Model name (default: env WEAVE_MODEL or provider default)",
     )
     parser.add_argument(
         "-k",
         "--api-key",
         type=str,
         default=None,
-        help="Gemini API key (default: env GEMINI_API_KEY)",
+        help="API key for the selected provider "
+        "(default: env GEMINI_API_KEY / OPENAI_API_KEY / ANTHROPIC_API_KEY)",
     )
     parser.add_argument(
         "--dpi",
@@ -129,17 +138,39 @@ def main(argv: list[str] | None = None) -> None:
 
     args = parser.parse_args(argv)
 
-    # Resolve API key
-    api_key = args.api_key or os.getenv("GEMINI_API_KEY")
+    # Resolve provider
+    provider = args.provider or os.getenv("WEAVE_PROVIDER", "gemini")
+    provider = provider.lower()
+
+    # Resolve API key (provider-specific env fallbacks)
+    _key_env = {
+        "gemini": "GEMINI_API_KEY",
+        "openai": "OPENAI_API_KEY",
+        "claude": "ANTHROPIC_API_KEY",
+        "anthropic": "ANTHROPIC_API_KEY",
+    }
+    api_key = args.api_key or os.getenv(_key_env.get(provider, "GEMINI_API_KEY"))
     if not api_key or api_key == "your_api_key_here":
         console.print(
-            "[bold red]Error: Gemini API key required.[/]\n"
-            "[dim]Set via --api-key, GEMINI_API_KEY env var, or .env file.[/]"
+            f"[bold red]Error: API key required for provider '{provider}'.[/]\n"
+            f"[dim]Set via --api-key or the corresponding env var "
+            f"({_key_env.get(provider, 'GEMINI_API_KEY')}).[/]"
         )
         sys.exit(1)
 
-    # Resolve model
-    model = args.model or os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    # Resolve model (provider defaults)
+    _model_defaults = {
+        "gemini": "gemini-2.5-flash",
+        "openai": "gpt-5.4-mini",
+        "claude": "claude-sonnet-4-5",
+        "anthropic": "claude-sonnet-4-5",
+    }
+    model = (
+        args.model
+        or os.getenv("WEAVE_MODEL")
+        or os.getenv("GEMINI_MODEL")  # backward-compat
+        or _model_defaults.get(provider, "gemini-2.5-flash")
+    )
 
     max_retries = max(1, int(args.max_retries or os.getenv("WEAVE_MAX_RETRIES", "6")))
     retry_base_delay = max(
@@ -157,6 +188,7 @@ def main(argv: list[str] | None = None) -> None:
         input_dir=args.input.resolve(),
         output_dir=args.output.resolve(),
         temp_dir=args.temp_dir.resolve(),
+        provider=provider,
         model=model,
         api_key=api_key,
         dpi=args.dpi,

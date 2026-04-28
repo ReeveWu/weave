@@ -22,6 +22,7 @@ class PipelineConfig:
     input_dir: Path
     output_dir: Path
     temp_dir: Path
+    provider: str = "gemini"
     model: str = "gemini-2.5-flash"
     api_key: str = ""
     dpi: int = 200

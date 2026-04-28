@@ -5,10 +5,9 @@ import shutil
 import sys
 from datetime import datetime
 
-from google import genai
-
 from .ai import (
     cleanup_uploaded_files,
+    create_provider,
     expand_all_chapters,
     generate_outline,
     parse_outline_chapters,
@@ -80,13 +79,6 @@ def run_pipeline(config: PipelineConfig) -> None:
     if resume_mode:
         config.output_dir = config.resume_dir
         checkpoint = _load_checkpoint(config)
-        if not checkpoint or "outline" not in checkpoint:
-            console.print(
-                "[bold red]Error: No valid checkpoint found in "
-                f"{config.resume_dir}[/]\n"
-                "[dim]Checkpoint must contain at least a saved outline.[/]"
-            )
-            sys.exit(1)
         console.print(f"[bold cyan]🔄 Resuming from {config.output_dir}[/]\n")
     else:
         # Step 0: Create a timestamped output sub-folder
@@ -99,17 +91,33 @@ def run_pipeline(config: PipelineConfig) -> None:
 
     # Step 1: PDF → Images
     image_filenames = convert_pdfs_to_images(config)
+    _save_checkpoint(config, image_filenames=image_filenames)
 
-    # Step 2: Upload to Gemini
-    client = genai.Client(api_key=config.api_key)
-    uploaded_files = upload_images(client, image_filenames, config)
+    # Step 2: Upload / prepare images
+    provider = create_provider(config.provider, config.api_key)
+    uploaded_files = upload_images(provider, image_filenames, config)
 
     try:
-        if resume_mode:
+        if resume_mode and checkpoint and "outline" in checkpoint:
             outline = checkpoint["outline"]
-            chapters = checkpoint["chapters"]
-            completed_indices = set(checkpoint.get("completed_chapters", []))
+            chapters = checkpoint.get("chapters")
+            if chapters is None:
+                chapters = parse_outline_chapters(outline)
+                if not chapters:
+                    console.print(
+                        "[yellow]Warning: Could not parse outline into chapters, "
+                        "treating as single chapter.[/]"
+                    )
+                    chapters = [
+                        {
+                            "title": "# Complete Handout",
+                            "outline_section": outline,
+                            "pages": image_filenames,
+                        }
+                    ]
+                _save_checkpoint(config, chapters=chapters, completed_chapters=[])
 
+            completed_indices = set(checkpoint.get("completed_chapters", []))
             completed_contents: dict[int, str] = {}
             for idx in completed_indices:
                 content = _load_chapter_content(config, idx)
@@ -121,8 +129,13 @@ def run_pipeline(config: PipelineConfig) -> None:
                 f"{len(completed_contents)} already expanded[/]\n"
             )
         else:
+            if resume_mode:
+                console.print(
+                    "[yellow]No saved outline found; retrying outline generation.[/]\n"
+                )
+
             # Step 3: Pass 1 — Outline
-            outline = generate_outline(client, uploaded_files, image_filenames, config)
+            outline = generate_outline(provider, uploaded_files, image_filenames, config)
 
             console.print("[dim]── Outline Preview ──[/]")
             console.print(outline[:2000] + ("..." if len(outline) > 2000 else ""))
@@ -169,7 +182,7 @@ def run_pipeline(config: PipelineConfig) -> None:
             _save_checkpoint(config, completed_chapters=completed)
 
         full_markdown = expand_all_chapters(
-            client,
+            provider,
             chapters,
             outline,
             uploaded_files,
@@ -184,22 +197,22 @@ def run_pipeline(config: PipelineConfig) -> None:
     except KeyboardInterrupt:
         console.print("\n[bold yellow]Interrupted by user.[/]")
         console.print(
-            f"[yellow]Progress saved. Resume with:[/]\n"
+            f"[yellow]Local progress saved. Resume with:[/]\n"
             f"[yellow]  weave --resume {config.output_dir} [other options][/]\n"
         )
-        cleanup_uploaded_files(client, uploaded_files)
+        cleanup_uploaded_files(provider, uploaded_files)
         sys.exit(130)
     except Exception as e:
         console.print(f"\n[bold red]Error: {e}[/]")
         console.print(
-            f"[yellow]Progress saved. Resume with:[/]\n"
+            f"[yellow]Local progress saved. Resume with:[/]\n"
             f"[yellow]  weave --resume {config.output_dir} [other options][/]\n"
         )
-        cleanup_uploaded_files(client, uploaded_files)
+        cleanup_uploaded_files(provider, uploaded_files)
         sys.exit(1)
 
     # Success: clean up everything
-    cleanup_uploaded_files(client, uploaded_files)
+    cleanup_uploaded_files(provider, uploaded_files)
     if not config.keep_temp and config.temp_dir.exists():
         shutil.rmtree(str(config.temp_dir), ignore_errors=True)
 
