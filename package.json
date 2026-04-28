@@ -1,0 +1,16 @@
+{
+  "name": "weave",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "setup": "npm install && npm run setup:python && npm run setup:client",
+    "setup:python": "python3 -m venv .venv && .venv/bin/pip install -e . && .venv/bin/pip install -r server/requirements.txt",
+    "setup:client": "npm install --prefix client",
+    "start": "concurrently --kill-others --names \"api,web\" --prefix-colors \"cyan,green\" \"npm run start:api\" \"npm run start:web\"",
+    "start:api": ".venv/bin/uvicorn server.main:app --reload --port 8000",
+    "start:web": "npm run dev --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

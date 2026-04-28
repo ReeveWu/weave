@@ -1,0 +1,206 @@
+export type Locale = "zh-TW" | "en"
+
+export const LOCALE_LABELS: Record<Locale, string> = {
+  "zh-TW": "中文",
+  en: "EN",
+}
+
+export const DEFAULT_OUTPUT_LANGUAGE: Record<Locale, string> = {
+  "zh-TW": "繁體中文",
+  en: "English",
+}
+
+export const messages = {
+  "zh-TW": {
+    common: {
+      copied: "已複製",
+      markdown: "Markdown",
+      pdf: "PDF",
+    },
+    header: {
+      githubAriaLabel: "在 GitHub 開啟 Weave 專案",
+      switchTo: "EN",
+      switchAriaLabel: "切換為英文介面",
+    },
+    toast: {
+      complete: "筆記生成完成！",
+      missingFile: "請先上傳至少一個 PDF 檔案",
+      missingApiKey: "請輸入 API Key",
+      started: "開始處理，請稍候...",
+      copySuccess: "Markdown 已複製到剪貼簿",
+      copyError: "複製失敗",
+      markdownDownload: "Markdown 下載開始",
+      pdfDownload: "PDF 下載開始",
+    },
+    upload: {
+      title: "上傳教材",
+      description: "支援多個 PDF 檔案，會合併處理",
+      ariaLabel: "上傳 PDF 檔案",
+      prompt: "拖曳 PDF 至此，或",
+      action: "點擊選擇",
+      hint: "支援多個 PDF 檔案",
+      selectedCount: (count: number) => `已選 ${count} 個檔案`,
+      removeFile: (name: string) => `移除 ${name}`,
+    },
+    config: {
+      title: "設定",
+      description: "選擇模型與輸出選項",
+      provider: "AI 提供商",
+      providerPlaceholder: "選擇提供商",
+      apiKey: "API Key",
+      showApiKey: "顯示 API Key",
+      hideApiKey: "隱藏 API Key",
+      apiKeyHint: {
+        gemini: "前往 Google AI Studio 取得 API Key",
+        openai: "前往 OpenAI Platform 取得 API Key",
+        claude: "前往 Anthropic Console 取得 API Key",
+      },
+      apiKeyLinks: {
+        gemini: "https://aistudio.google.com/apikey",
+        openai: "https://platform.openai.com/api-keys",
+        claude: "https://console.anthropic.com/settings/keys",
+      },
+      apiKeyLinkText: {
+        gemini: "Google AI Studio",
+        openai: "OpenAI Platform",
+        claude: "Anthropic Console",
+      },
+      model: "模型",
+      modelPlaceholder: "選擇模型",
+      recommended: "推薦",
+      outputLanguage: "輸出語言",
+      languagePlaceholder: "選擇語言",
+      exportPdf: "同時匯出 PDF",
+    },
+    actions: {
+      processing: "處理中...",
+      start: "開始生成",
+      copyMarkdown: "複製 Markdown",
+      downloadMarkdown: "下載 Markdown",
+      downloadPdf: "下載 PDF",
+      restart: "重新開始",
+      retry: "重新嘗試",
+    },
+    progress: {
+      title: "處理進度",
+      runningDescription: "AI 正在處理您的教材...",
+      errorDescription: "處理過程中發生錯誤",
+      complete: "完成",
+      running: "處理中...",
+      steps: {
+        converting: "轉換 PDF 為圖片",
+        uploading: "上傳至 AI",
+        outline: "生成大綱",
+        expanding: "展開章節內容",
+        postprocess: "後處理整合",
+        pdf_export: "匯出 PDF",
+      },
+      errors: {
+        failed: "處理失敗",
+        disconnected: "連線中斷，請重試",
+      },
+    },
+    result: {
+      title: "生成結果",
+      description: "AI 已完成筆記生成",
+    },
+    footer: "Weave — 讓知識沿著脈絡成形",
+  },
+  en: {
+    common: {
+      copied: "Copied",
+      markdown: "Markdown",
+      pdf: "PDF",
+    },
+    header: {
+      githubAriaLabel: "Open the Weave project on GitHub",
+      switchTo: "中文",
+      switchAriaLabel: "Switch to Chinese interface",
+    },
+    toast: {
+      complete: "Notes are ready.",
+      missingFile: "Upload at least one PDF file first.",
+      missingApiKey: "Enter your API Key.",
+      started: "Processing started. This may take a moment...",
+      copySuccess: "Markdown copied to clipboard.",
+      copyError: "Copy failed.",
+      markdownDownload: "Markdown download started.",
+      pdfDownload: "PDF download started.",
+    },
+    upload: {
+      title: "Upload Materials",
+      description: "Multiple PDFs are supported and merged into one run.",
+      ariaLabel: "Upload PDF files",
+      prompt: "Drop PDFs here, or",
+      action: "choose files",
+      hint: "Multiple PDF files supported",
+      selectedCount: (count: number) => `${count} file${count === 1 ? "" : "s"} selected`,
+      removeFile: (name: string) => `Remove ${name}`,
+    },
+    config: {
+      title: "Settings",
+      description: "Choose the model and output options",
+      provider: "AI Provider",
+      providerPlaceholder: "Choose provider",
+      apiKey: "API Key",
+      showApiKey: "Show API Key",
+      hideApiKey: "Hide API Key",
+      apiKeyHint: {
+        gemini: "Get your API Key from Google AI Studio",
+        openai: "Get your API Key from OpenAI Platform",
+        claude: "Get your API Key from Anthropic Console",
+      },
+      apiKeyLinks: {
+        gemini: "https://aistudio.google.com/apikey",
+        openai: "https://platform.openai.com/api-keys",
+        claude: "https://console.anthropic.com/settings/keys",
+      },
+      apiKeyLinkText: {
+        gemini: "Google AI Studio",
+        openai: "OpenAI Platform",
+        claude: "Anthropic Console",
+      },
+      model: "Model",
+      modelPlaceholder: "Choose model",
+      recommended: "Recommended",
+      outputLanguage: "Output Language",
+      languagePlaceholder: "Choose language",
+      exportPdf: "Export PDF as well",
+    },
+    actions: {
+      processing: "Processing...",
+      start: "Start",
+      copyMarkdown: "Copy Markdown",
+      downloadMarkdown: "Download Markdown",
+      downloadPdf: "Download PDF",
+      restart: "Start Over",
+      retry: "Try Again",
+    },
+    progress: {
+      title: "Progress",
+      runningDescription: "AI is processing your materials...",
+      errorDescription: "Something went wrong while processing",
+      complete: "Complete",
+      running: "Processing...",
+      steps: {
+        converting: "Converting PDF to images",
+        uploading: "Uploading to AI",
+        outline: "Generating outline",
+        expanding: "Expanding chapters",
+        postprocess: "Assembling output",
+        pdf_export: "Exporting PDF",
+      },
+      errors: {
+        failed: "Processing failed",
+        disconnected: "Connection interrupted. Please try again.",
+      },
+    },
+    result: {
+      title: "Result",
+      description: "AI has finished generating your notes",
+    },
+    footer: "Weave — Let knowledge take shape in context",
+  },
+} as const
+
+export type Messages = (typeof messages)[Locale]
