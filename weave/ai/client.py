@@ -51,7 +51,7 @@ def _upload_single_file(
             )
             if not is_retryable or attempt == max_retries - 1:
                 raise
-            wait = 2 * (2 ** attempt)
+            wait = 2 * (2**attempt)
             console.print(
                 f"[yellow]Upload attempt {attempt + 1} failed ({exc}), "
                 f"retrying in {wait}s...[/]"

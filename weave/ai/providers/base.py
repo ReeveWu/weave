@@ -25,7 +25,7 @@ class AIProvider(ABC):
     def upload_images(
         self,
         image_filenames: list[str],
-        config: "PipelineConfig",
+        config: PipelineConfig,
     ) -> dict[str, Any]:
         """Prepare images for API use.
 
@@ -77,6 +77,5 @@ def create_provider(provider: str, api_key: str) -> AIProvider:
 
         return ClaudeProvider(api_key)
     raise ValueError(
-        f"Unknown AI provider {provider!r}. "
-        "Expected 'gemini', 'openai', or 'claude'."
+        f"Unknown AI provider {provider!r}. Expected 'gemini', 'openai', or 'claude'."
     )

@@ -5,11 +5,9 @@ from __future__ import annotations
 from google import genai
 
 from ...config import PipelineConfig
-from ..client import (
-    call_gemini,
-    cleanup_uploaded_files as _cleanup,
-    upload_images as _upload,
-)
+from ..client import call_gemini
+from ..client import cleanup_uploaded_files as _cleanup
+from ..client import upload_images as _upload
 from .base import AIProvider
 
 
@@ -19,9 +17,7 @@ class GeminiProvider(AIProvider):
     def __init__(self, api_key: str) -> None:
         self._client = genai.Client(api_key=api_key)
 
-    def upload_images(
-        self, image_filenames: list[str], config: PipelineConfig
-    ) -> dict:
+    def upload_images(self, image_filenames: list[str], config: PipelineConfig) -> dict:
         return _upload(self._client, image_filenames, config)
 
     def cleanup_uploaded_files(self, uploaded_files: dict) -> None:

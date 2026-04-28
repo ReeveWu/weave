@@ -33,7 +33,9 @@ def _patch_pipeline_success(monkeypatch, calls):
         "weave.pipeline.upload_images",
         lambda _client, filenames, _config: {name: object() for name in filenames},
     )
-    monkeypatch.setattr("weave.pipeline.create_provider", lambda _provider, _api_key: object())
+    monkeypatch.setattr(
+        "weave.pipeline.create_provider", lambda _provider, _api_key: object()
+    )
     monkeypatch.setattr("weave.pipeline.cleanup_uploaded_files", lambda *_args: None)
 
     def generate_outline(*_args):

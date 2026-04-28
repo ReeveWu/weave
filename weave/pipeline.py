@@ -135,7 +135,9 @@ def run_pipeline(config: PipelineConfig) -> None:
                 )
 
             # Step 3: Pass 1 — Outline
-            outline = generate_outline(provider, uploaded_files, image_filenames, config)
+            outline = generate_outline(
+                provider, uploaded_files, image_filenames, config
+            )
 
             console.print("[dim]── Outline Preview ──[/]")
             console.print(outline[:2000] + ("..." if len(outline) > 2000 else ""))

@@ -17,9 +17,7 @@ class JobCreateParams(BaseModel):
     def validate_provider(cls, v: str) -> str:
         allowed = {"gemini", "openai", "claude", "anthropic"}
         if v.lower() not in allowed:
-            raise ValueError(
-                f"provider must be one of {sorted(allowed)}, got {v!r}"
-            )
+            raise ValueError(f"provider must be one of {sorted(allowed)}, got {v!r}")
         return v.lower()
 
 
@@ -40,6 +38,6 @@ class JobResultResponse(BaseModel):
 class SSEEvent(BaseModel):
     """Shape of a single Server-Sent Event payload."""
 
-    type: str   # "progress" | "complete" | "error"
-    step: str   # machine-readable step identifier
+    type: str  # "progress" | "complete" | "error"
+    step: str  # machine-readable step identifier
     detail: str = ""

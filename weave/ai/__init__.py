@@ -10,16 +10,12 @@ from .prompts import get_expand_prompt, get_outline_prompt
 from .providers.base import AIProvider, B64ImageToken, create_provider
 
 
-def upload_images(
-    provider: AIProvider, image_filenames: list[str], config
-) -> dict:
+def upload_images(provider: AIProvider, image_filenames: list[str], config) -> dict:
     """Delegate image preparation to the active provider."""
     return provider.upload_images(image_filenames, config)
 
 
-def cleanup_uploaded_files(
-    provider: AIProvider, uploaded_files: dict
-) -> None:
+def cleanup_uploaded_files(provider: AIProvider, uploaded_files: dict) -> None:
     """Delegate cleanup to the active provider."""
     provider.cleanup_uploaded_files(uploaded_files)
 

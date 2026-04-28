@@ -60,7 +60,7 @@ class ClaudeProvider(AIProvider):
         retry_base_delay: int = 2,
         unavailable_retry_delay: int = 30,
     ) -> str:
-        """Convert the flat content list into Anthropic message blocks and call the API."""
+        """Convert content into Anthropic message blocks and call the API."""
         user_content: list = []
         for item in contents:
             if isinstance(item, str):

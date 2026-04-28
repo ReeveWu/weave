@@ -6,9 +6,8 @@ import shutil
 import threading
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
@@ -20,20 +19,21 @@ router = APIRouter(prefix="/jobs", tags=["jobs"])
 # ---------------------------------------------------------------------------
 # Project paths (resolved relative to this file → server/ → project root)
 # ---------------------------------------------------------------------------
-_SERVER_DIR = Path(__file__).parent.parent          # server/
-_PROJECT_ROOT = _SERVER_DIR.parent                   # Weave/
+_SERVER_DIR = Path(__file__).parent.parent  # server/
+_PROJECT_ROOT = _SERVER_DIR.parent  # Weave/
 _OUTPUT_ROOT = _PROJECT_ROOT / "output"
-_JOB_DATA_ROOT = _SERVER_DIR / "job_data"            # server/job_data/
+_JOB_DATA_ROOT = _SERVER_DIR / "job_data"  # server/job_data/
 
 
 # ---------------------------------------------------------------------------
 # In-memory job store
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class JobState:
     job_id: str
-    status: str = "pending"          # pending | running | complete | error
+    status: str = "pending"  # pending | running | complete | error
     input_dir: Path = field(default_factory=Path)
     temp_dir: Path = field(default_factory=Path)
     output_dir: Path | None = None
@@ -49,6 +49,7 @@ _jobs: dict[str, JobState] = {}
 # ---------------------------------------------------------------------------
 # Pipeline orchestration (runs in a background thread)
 # ---------------------------------------------------------------------------
+
 
 def _run_pipeline_thread(job: JobState) -> None:
     """Execute the Weave pipeline in a worker thread, emitting SSE events."""
@@ -117,7 +118,9 @@ def _run_pipeline_thread(job: JobState) -> None:
             # Step 3 — Pass 1: Generate outline
             # ----------------------------------------------------------------
             emit("progress", "outline", "分析講義結構（Pass 1）...")
-            outline = generate_outline(provider, uploaded_files, image_filenames, config)
+            outline = generate_outline(
+                provider, uploaded_files, image_filenames, config
+            )
             emit("progress", "outline_done", "大綱生成完成")
 
             # ----------------------------------------------------------------
@@ -200,6 +203,7 @@ def _run_pipeline_thread(job: JobState) -> None:
 # Endpoints
 # ---------------------------------------------------------------------------
 
+
 @router.post("", response_model=JobCreateResponse, status_code=201)
 async def create_job(
     files: list[UploadFile] = File(..., description="One or more PDF files"),
@@ -211,7 +215,9 @@ async def create_job(
     try:
         params_dict = json.loads(params)
     except json.JSONDecodeError as exc:
-        raise HTTPException(status_code=422, detail=f"Invalid params JSON: {exc}") from exc
+        raise HTTPException(
+            status_code=422, detail=f"Invalid params JSON: {exc}"
+        ) from exc
 
     required = {"model", "api_key", "language", "export_pdf"}
     if missing := required - params_dict.keys():
@@ -219,7 +225,9 @@ async def create_job(
 
     # Validate files
     if not files:
-        raise HTTPException(status_code=422, detail="At least one PDF file is required.")
+        raise HTTPException(
+            status_code=422, detail="At least one PDF file is required."
+        )
     for f in files:
         if f.content_type not in ("application/pdf", "application/octet-stream"):
             if not (f.filename or "").lower().endswith(".pdf"):
@@ -327,7 +335,10 @@ async def get_job_result(job_id: str) -> JobResultResponse:
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found.")
     if job.status != "complete":
-        raise HTTPException(status_code=409, detail=f"Job is not complete (status: {job.status}).")
+        raise HTTPException(
+            status_code=409,
+            detail=f"Job is not complete (status: {job.status}).",
+        )
 
     md_path = job.output_dir / "handout.md"
     if not md_path.exists():

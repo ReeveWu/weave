@@ -37,7 +37,9 @@ def _ensure_list_heading_breaks(md_text: str) -> str:
     spaces turns the author-intended break into a Markdown hard break.
     """
     list_item_re = re.compile(r"^[ \t]*(?:[*+-]|\d+[.)])[ \t]+")
-    bold_heading_re = re.compile(r"^[ \t]*(?:[*+-]|\d+[.)])[ \t]+(?:\*\*.+\*\*|__.+__)[ \t]*$")
+    bold_heading_re = re.compile(
+        r"^[ \t]*(?:[*+-]|\d+[.)])[ \t]+(?:\*\*.+\*\*|__.+__)[ \t]*$"
+    )
     fence_re = re.compile(r"^\s{0,3}(```|~~~)")
     lines = md_text.splitlines()
     result: list[str] = []
