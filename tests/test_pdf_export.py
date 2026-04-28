@@ -22,3 +22,12 @@ def test_code_css_wraps_long_lines_for_pdf():
     assert ".codehilite" in css
     assert "white-space: pre-wrap" in css
     assert "overflow-wrap: anywhere" in css
+
+
+def test_markdown_to_html_preserves_bold_list_heading_break():
+    html = _markdown_to_html(
+        """*   **決策樹：不同準確度層級**
+    決策樹是一種機器學習模型。"""
+    )
+
+    assert "<strong>決策樹：不同準確度層級</strong><br" in html

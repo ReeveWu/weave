@@ -4,6 +4,7 @@ from pathlib import Path
 
 from ..config import PipelineConfig, console
 from .postprocess import (
+    _ensure_list_heading_breaks,
     _ensure_list_spacing,
     _ensure_table_spacing,
     _unwrap_backtick_images,
@@ -51,6 +52,7 @@ def _markdown_to_html(md_text: str) -> str:
     from .math_render import protect_math, restore_math
 
     md_text = _ensure_list_spacing(md_text)
+    md_text = _ensure_list_heading_breaks(md_text)
     md_text = _ensure_table_spacing(md_text)
     md_text = _unwrap_backtick_images(md_text)
 
@@ -121,11 +123,9 @@ def convert_md_to_pdf(md_path: Path, pdf_path: Path | None = None) -> Path:
     font_config = FontConfiguration()
 
     # Wrap in full HTML with styling
-    # NOTE: macOS Preview has rendering issues with CFF-based OpenType fonts
-    # (CID Type 0C) like PingFang TC.  TrueType-based CJK fonts such as
-    # "Heiti TC" embed as CID TrueType and render correctly in Preview.
-    # Chrome's PDF viewer (PDFium) handles both formats fine, which is why
-    # the PDF looks correct in Chrome but has missing glyphs in Preview.
+    # NOTE: macOS Preview can render some CFF-based CJK fonts poorly.  Keep
+    # TrueType-based Heiti TC first, and set strong/b explicitly so bold text
+    # maps to a heavier face instead of being visually indistinguishable.
     html_content = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -134,6 +134,7 @@ def convert_md_to_pdf(md_path: Path, pdf_path: Path | None = None) -> Path:
     body {{
         font-family: "Heiti TC", "Noto Sans TC", "Microsoft JhengHei",
                      "PingFang TC", "Helvetica Neue", Arial, sans-serif;
+        font-weight: 400;
         line-height: 1.8;
         max-width: 210mm;
         margin: 0 auto;
@@ -155,6 +156,7 @@ def convert_md_to_pdf(md_path: Path, pdf_path: Path | None = None) -> Path:
     }}
     h3 {{ font-size: 14pt; margin-top: 18px; }}
     h4 {{ font-size: 12pt; margin-top: 14px; }}
+    strong, b {{ font-weight: 700; }}
     code {{
         background-color: #f4f4f4;
         padding: 2px 5px;

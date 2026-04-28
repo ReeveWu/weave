@@ -29,6 +29,42 @@ def _ensure_list_spacing(md_text: str) -> str:
     return "\n".join(result)
 
 
+def _ensure_list_heading_breaks(md_text: str) -> str:
+    """Preserve line breaks after bold-only list item headings.
+
+    Markdown treats an indented continuation line as part of the same paragraph,
+    so HTML collapses the source newline into a single space.  A trailing two
+    spaces turns the author-intended break into a Markdown hard break.
+    """
+    list_item_re = re.compile(r"^[ \t]*(?:[*+-]|\d+[.)])[ \t]+")
+    bold_heading_re = re.compile(r"^[ \t]*(?:[*+-]|\d+[.)])[ \t]+(?:\*\*.+\*\*|__.+__)[ \t]*$")
+    fence_re = re.compile(r"^\s{0,3}(```|~~~)")
+    lines = md_text.splitlines()
+    result: list[str] = []
+    in_fence = False
+
+    for i, line in enumerate(lines):
+        if fence_re.match(line):
+            in_fence = not in_fence
+
+        next_line = lines[i + 1] if i + 1 < len(lines) else ""
+        has_indented_continuation = (
+            next_line.startswith((" ", "\t"))
+            and next_line.strip() != ""
+            and not list_item_re.match(next_line)
+        )
+        if (
+            not in_fence
+            and bold_heading_re.match(line)
+            and has_indented_continuation
+            and not line.endswith(("  ", "\\"))
+        ):
+            line = f"{line.rstrip()}  "
+        result.append(line)
+
+    return "\n".join(result)
+
+
 def _unwrap_backtick_images(md_text: str) -> str:
     """Remove backticks wrapping image references so they render as images.
 
@@ -69,6 +105,7 @@ def post_process(
     console.print("[bold cyan]🔧 Post-processing...[/]")
 
     markdown_content = _ensure_list_spacing(markdown_content)
+    markdown_content = _ensure_list_heading_breaks(markdown_content)
     markdown_content = _ensure_table_spacing(markdown_content)
     markdown_content = _unwrap_backtick_images(markdown_content)
 

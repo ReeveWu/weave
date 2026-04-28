@@ -1,6 +1,6 @@
 """Tests for Markdown post-processing helpers."""
 
-from weave.export.postprocess import _ensure_list_spacing
+from weave.export.postprocess import _ensure_list_heading_breaks, _ensure_list_spacing
 
 
 def test_ensure_list_spacing_handles_nested_list_items_after_paragraphs():
@@ -36,3 +36,25 @@ Intro
 """
 
     assert _ensure_list_spacing(markdown) == markdown.rstrip("\n")
+
+
+def test_ensure_list_heading_breaks_adds_hard_break_for_bold_heading():
+    markdown = """\
+*   **決策樹：不同準確度層級**
+    決策樹是一種機器學習模型。
+"""
+
+    result = _ensure_list_heading_breaks(markdown)
+
+    assert "**決策樹：不同準確度層級**  \n    決策樹" in result
+
+
+def test_ensure_list_heading_breaks_ignores_fenced_code_blocks():
+    markdown = """\
+```md
+*   **決策樹：不同準確度層級**
+    決策樹是一種機器學習模型。
+```
+"""
+
+    assert _ensure_list_heading_breaks(markdown) == markdown.rstrip("\n")
