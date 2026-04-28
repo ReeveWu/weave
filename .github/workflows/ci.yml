@@ -31,3 +31,19 @@ jobs:
         run: pip install -e ".[dev]"
       - name: Run tests
         run: pytest -v
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
+      - name: Install frontend dependencies
+        run: npm ci --prefix client
+      - name: Lint frontend
+        run: npm run lint --prefix client
+      - name: Build frontend
+        run: npm run build --prefix client
