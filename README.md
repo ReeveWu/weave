@@ -13,7 +13,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Node.js 18+](https://img.shields.io/badge/node-18+-339933.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Gemini API](https://img.shields.io/badge/AI-Google%20Gemini-4285F4.svg)](https://ai.google.dev/)
+[![AI Providers](https://img.shields.io/badge/AI-Gemini%20%7C%20OpenAI%20%7C%20Claude-4285F4.svg)](#supported-ai-providers)
 
 [English](#features) | [繁體中文](README.zh.md)
 
@@ -21,18 +21,32 @@
 
 ---
 
-Weave is an AI-powered tool that transforms PDF slides into structured Markdown study guides. It offers a **modern web interface** for point-and-click usage, as well as a **CLI** for scripting and automation.
+Weave is an AI-powered tool that transforms PDF slides into structured Markdown study guides. It offers a **modern web interface** for point-and-click usage, a **FastAPI backend** for job orchestration, and a **CLI** for scripting and automation.
 
 ## Features
 
+- **Modern Web UI** — Upload PDFs, choose an AI provider/model, track progress, preview Markdown, and download results
+- **Multi-provider AI** — Use Google Gemini, OpenAI, or Anthropic Claude from the web UI or CLI
 - **Two-Pass AI Analysis** — First generates a structured outline, then expands each chapter with full context
 - **PDF to Handout** — Converts multi-page PDF slides into a single, well-organized Markdown document
 - **Smart Image Embedding** — Automatically identifies and embeds important charts, diagrams, and formulas
 - **Coverage Verification** — Ensures every single slide page is referenced in the final handout
 - **Multi-language Output** — Generate handouts in any language (default: Traditional Chinese)
 - **Zero Content Loss** — Preserves ALL information from slides, including footnotes and small annotations
-- **PDF Export** — One command to convert Markdown handouts to beautifully styled PDFs
-- **Powered by Gemini** — Leverages Google's multimodal AI with large context window
+- **Rendered Markdown Preview** — View the generated handout in the browser with images, tables, code blocks, and headings
+- **PDF Export** — Export generated handouts to styled PDFs from the web UI or CLI
+
+---
+
+## Supported AI Providers
+
+| Provider | API key environment variable | Example models |
+| --- | --- | --- |
+| Google Gemini | `GEMINI_API_KEY` | `gemini-2.5-flash`, `gemini-2.5-pro`, `gemini-3-flash-preview` |
+| OpenAI | `OPENAI_API_KEY` | `gpt-5.4-pro`, `gpt-5.4`, `gpt-5-mini`, `gpt-4.1` |
+| Anthropic Claude | `ANTHROPIC_API_KEY` | `claude-sonnet-4-5`, `claude-opus-4-7` |
+
+Gemini remains the default provider, but you can switch providers in the web UI or with `--provider` in the CLI.
 
 ---
 
@@ -43,7 +57,10 @@ Weave is an AI-powered tool that transforms PDF slides into structured Markdown 
 - **Python 3.10+** and **Node.js 18+**
 - [Poppler](https://poppler.freedesktop.org/) — required for PDF rendering
 - [Pango](https://www.gtk.org/docs/architecture/pango) — required for PDF export
-- A [Google Gemini API key](https://aistudio.google.com/apikey)
+- An API key for at least one supported provider:
+  [Google AI Studio](https://aistudio.google.com/apikey),
+  [OpenAI Platform](https://platform.openai.com/api-keys), or
+  [Anthropic Console](https://console.anthropic.com/settings/keys)
 
 ```bash
 # macOS
@@ -88,7 +105,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### 4. Using the Web UI
 
 1. **Upload PDFs** — Drag and drop (or click to browse) one or more PDF slide files
-2. **Configure** — Enter your Gemini API key, choose a model and output language, optionally enable PDF export
+2. **Configure** — Choose Gemini, OpenAI, or Claude; enter the matching API key; pick a model and output language; optionally enable PDF export
 3. **Run** — Click **Start** and watch real-time progress across each pipeline stage
 4. **Get results** — View the rendered Markdown handout, then copy, download, or export as PDF
 
@@ -116,6 +133,12 @@ weave -i ./my-slides -o ./my-notes
 # Use a specific model
 weave -m gemini-2.5-pro
 
+# Use OpenAI
+weave --provider openai -m gpt-5.4-mini -k "your-openai-api-key"
+
+# Use Claude
+weave --provider claude -m claude-sonnet-4-5 -k "your-anthropic-api-key"
+
 # Generate outline only (preview the structure before full expansion)
 weave --outline-only
 
@@ -142,7 +165,14 @@ For the CLI, you can set your API key via `.env` instead of passing `-k` each ti
 
 ```bash
 cp .env.example .env
-# Edit .env and set GEMINI_API_KEY=your_actual_key
+# Edit .env and set one or more provider keys:
+GEMINI_API_KEY=your_gemini_key
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
+
+# Optional defaults
+WEAVE_PROVIDER=gemini
+WEAVE_MODEL=gemini-2.5-flash
 ```
 
 See [docs/cli-reference.md](docs/cli-reference.md) for the full list of options.
@@ -186,6 +216,7 @@ config = PipelineConfig(
     input_dir=Path("./my-slides"),
     output_dir=Path("./my-notes"),
     temp_dir=Path("./tmp"),
+    provider="gemini",
     api_key="your-api-key",
     model="gemini-2.5-flash",
     language="English",

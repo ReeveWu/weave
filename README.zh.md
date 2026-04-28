@@ -13,7 +13,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Node.js 18+](https://img.shields.io/badge/node-18+-339933.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Gemini API](https://img.shields.io/badge/AI-Google%20Gemini-4285F4.svg)](https://ai.google.dev/)
+[![AI Providers](https://img.shields.io/badge/AI-Gemini%20%7C%20OpenAI%20%7C%20Claude-4285F4.svg)](#支援的-ai-提供商)
 
 [English](README.md) | [繁體中文](README.zh.md)
 
@@ -21,7 +21,7 @@
 
 ---
 
-**Weave** 是一個 AI 驅動的工具，能將 PDF 投影片自動轉換為結構化的 Markdown 學習講義。提供**現代化網頁介面**讓你點幾下就能完成，同時也支援 **CLI** 供腳本與自動化使用。
+**Weave** 是一個 AI 驅動的工具，能將 PDF 投影片自動轉換為結構化的 Markdown 學習講義。提供**現代化網頁介面**、負責任務流程的 **FastAPI 後端**，同時也支援 **CLI** 供腳本與自動化使用。
 
 ## 解決的痛點
 
@@ -32,14 +32,28 @@
 
 ## 功能特色
 
+- **現代化網頁介面** — 上傳 PDF、選擇 AI 提供商與模型、追蹤進度、預覽 Markdown、下載結果
+- **多 AI 提供商** — 支援 Google Gemini、OpenAI、Anthropic Claude，可在網頁介面或 CLI 中切換
 - **兩階段 AI 分析** — 先產生結構化大綱，再逐章擴展完整內容
 - **PDF 轉講義** — 將多頁 PDF 投影片轉換為一份結構清晰的 Markdown 文件
 - **智慧圖片嵌入** — 自動辨識並嵌入重要的圖表、示意圖與公式
 - **覆蓋率驗證** — 確保每一頁投影片都被納入最終講義
 - **多語言輸出** — 可選擇任何語言產生講義（預設：繁體中文）
 - **零資訊遺失** — 完整保留投影片所有內容，包括註腳與小字說明
-- **PDF 匯出** — 一鍵將 Markdown 講義轉為排版精美的 PDF
-- **Gemini 驅動** — 使用 Google 的多模態 AI，支援大量上下文
+- **Markdown 預覽** — 在瀏覽器中完整呈現標題、圖片、表格、程式碼區塊與清單
+- **PDF 匯出** — 可從網頁介面或 CLI 將 Markdown 講義轉為排版精美的 PDF
+
+---
+
+## 支援的 AI 提供商
+
+| 提供商 | API key 環境變數 | 範例模型 |
+| --- | --- | --- |
+| Google Gemini | `GEMINI_API_KEY` | `gemini-2.5-flash`, `gemini-2.5-pro`, `gemini-3-flash-preview` |
+| OpenAI | `OPENAI_API_KEY` | `gpt-5.4-pro`, `gpt-5.4`, `gpt-5-mini`, `gpt-4.1` |
+| Anthropic Claude | `ANTHROPIC_API_KEY` | `claude-sonnet-4-5`, `claude-opus-4-7` |
+
+Gemini 仍是預設提供商，但可以在網頁介面切換，或透過 CLI 的 `--provider` 指定。
 
 ---
 
@@ -50,7 +64,10 @@
 - **Python 3.10+** 與 **Node.js 18+**
 - [Poppler](https://poppler.freedesktop.org/)（PDF 渲染依賴）
 - [Pango](https://www.gtk.org/docs/architecture/pango)（PDF 匯出依賴）
-- 一組 [Google Gemini API 金鑰](https://aistudio.google.com/apikey)
+- 至少一組支援提供商的 API key：
+  [Google AI Studio](https://aistudio.google.com/apikey)、
+  [OpenAI Platform](https://platform.openai.com/api-keys)，或
+  [Anthropic Console](https://console.anthropic.com/settings/keys)
 
 ```bash
 # macOS
@@ -95,7 +112,7 @@ npm run start
 ### 4. 使用網頁介面
 
 1. **上傳 PDF** — 拖放或點擊選取一或多個 PDF 投影片檔案
-2. **設定** — 輸入 Gemini API 金鑰、選擇模型與輸出語言，可選擇是否同時匯出 PDF
+2. **設定** — 選擇 Gemini、OpenAI 或 Claude，輸入對應 API key，選擇模型與輸出語言，可選擇是否同時匯出 PDF
 3. **執行** — 點擊「開始」，即時觀看每個處理階段的進度
 4. **取得結果** — 瀏覽渲染後的 Markdown 講義，可複製、下載或匯出為 PDF
 
@@ -123,6 +140,12 @@ weave -i ./我的投影片 -o ./筆記
 # 使用 Pro 模型（更高品質）
 weave -m gemini-2.5-pro
 
+# 使用 OpenAI
+weave --provider openai -m gpt-5.4-mini -k "your-openai-api-key"
+
+# 使用 Claude
+weave --provider claude -m claude-sonnet-4-5 -k "your-anthropic-api-key"
+
 # 只產生大綱（先檢視結構再決定是否展開）
 weave --outline-only
 
@@ -149,7 +172,14 @@ weave-pdf handout.md -o my_handout.pdf
 
 ```bash
 cp .env.example .env
-# 編輯 .env，設定 GEMINI_API_KEY=your_actual_key
+# 編輯 .env，設定一或多組 provider key：
+GEMINI_API_KEY=your_gemini_key
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
+
+# 可選：設定預設提供商與模型
+WEAVE_PROVIDER=gemini
+WEAVE_MODEL=gemini-2.5-flash
 ```
 
 > 📖 完整 CLI 參數說明請參考 [CLI Reference](docs/cli-reference.md)
