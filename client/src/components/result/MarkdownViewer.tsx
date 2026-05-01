@@ -24,6 +24,29 @@ function resolveOutputAssetUrl(src: string | undefined, jobId: string | undefine
   return getJobFileUrl(jobId, src)
 }
 
+type MarkdownAstNode = {
+  type?: string
+  tagName?: string
+  children?: unknown[]
+}
+
+function isMarkdownAstNode(value: unknown): value is MarkdownAstNode {
+  return typeof value === "object" && value !== null
+}
+
+function containsImageNode(node: unknown): boolean {
+  if (!isMarkdownAstNode(node) || !Array.isArray(node.children)) {
+    return false
+  }
+
+  return node.children.some(
+    (child) =>
+      isMarkdownAstNode(child) &&
+      child.type === "element" &&
+      child.tagName === "img"
+  )
+}
+
 export function MarkdownViewer({ content, jobId }: MarkdownViewerProps) {
   const components: Components = {
     h1: ({ children, ...props }) => (
@@ -52,11 +75,16 @@ export function MarkdownViewer({ content, jobId }: MarkdownViewerProps) {
         {children}
       </h4>
     ),
-    p: ({ children, ...props }) => (
-      <p className="my-3 leading-8 text-foreground" {...props}>
-        {children}
-      </p>
-    ),
+    p: ({ children, node, ...props }) =>
+      containsImageNode(node) ? (
+        <div className="my-3 text-foreground" {...props}>
+          {children}
+        </div>
+      ) : (
+        <p className="my-3 leading-8 text-foreground" {...props}>
+          {children}
+        </p>
+      ),
     a: ({ children, href, ...props }) => (
       <a
         href={href}
@@ -92,7 +120,8 @@ export function MarkdownViewer({ content, jobId }: MarkdownViewerProps) {
       </blockquote>
     ),
     hr: (props) => <hr className="my-6 border-border" {...props} />,
-    img: ({ src, alt, ...props }) => {
+    img: ({ src, alt, node: _node, ...props }) => {
+      void _node
       const resolvedSrc = resolveOutputAssetUrl(typeof src === "string" ? src : undefined, jobId)
 
       return (
