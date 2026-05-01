@@ -53,6 +53,7 @@ server/job_data/
 *.jpeg
 *.png
 !assets/*
+!client/public/logo.png
 
 # Jupyter
 .ipynb_checkpoints/
